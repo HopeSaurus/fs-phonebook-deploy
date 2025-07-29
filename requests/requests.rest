@@ -1,0 +1,34 @@
+DELETE http://localhost:3001/api/persons/2
+###
+POST http://localhost:3001/api/persons/
+Content-Type: application/json
+
+{
+  "name": "Testinho as always",
+  "number": "6969-420420"
+}
+###
+POST http://localhost:3001/api/persons/
+Content-Type: application/json
+
+{
+  "number": "6969-420420"
+}
+###
+POST http://localhost:3001/api/persons/
+Content-Type: application/json
+
+{
+  "name": "Mary Poppendieck",
+  "number": "6969-420420"
+}
+###
+POST http://localhost:3001/api/persons/
+Content-Type: application/json
+
+{
+  "name": "Hemlo hellower",
+  "number": "6969-420420"
+}
+###
+GET http://localhost:3001/api/persons
