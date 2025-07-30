@@ -38,7 +38,6 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 app.post('/api/persons',(request, response) => {
-  const id = Math.round(Math.random()*10000)
   const data = request.body
   if(!data.name || !data.number){
     response.append('Content-Type','application/json')
@@ -49,18 +48,13 @@ app.post('/api/persons',(request, response) => {
     .end()
     return
   }
-  if(phonebook.find(person => person.name === data.name)){
-    response.append('Content-Type','application/json')
-    .status(400)
-    .json({
-      error: 'name must be unique'
-    })
-    .end()
-    return
-  }
-  const record = {id, ...data}
-  phonebook = phonebook.concat(record)
-  response.status(200).json(record)
+  const person = new Person({
+    name: data.name,
+    number: data.number,
+  })
+  person.save().then(savedPerson => {
+    response.status(201).json(savedPerson)
+  }).catch(e => response.send(e))
 })
 
 const PORT = process.env.PORT
