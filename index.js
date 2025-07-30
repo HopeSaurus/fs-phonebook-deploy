@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 var morgan = require('morgan')
@@ -9,31 +10,12 @@ app.use(express.static('dist'))
 
 app.use(morgan(':method :url :status :response-time ms :payload'))
 
-let phonebook = [
-  { 
-    "id": "1",
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": "2",
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": "3",
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": "4",
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
+const Person = require('./models/person')
 
 app.get('/api/persons', (request, response) => {
-  response.json(phonebook)
+  Person.find({}).then(people => {
+    response.json(people)
+  })
 })
 
 app.get('/info', (request, response) => {
@@ -43,18 +25,9 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  const person = phonebook.find(person => person.id === id)
-  if(!person){
-    response.append('Content-Type','application/json')
-    .status(404)
-    .json({
-      error: 'missing id'
-    })
-    .end()
-    return
-  }
+  Person.findById(request.params.id).then(person => {
   response.json(person)
+  })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -90,7 +63,7 @@ app.post('/api/persons',(request, response) => {
   response.status(200).json(record)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
