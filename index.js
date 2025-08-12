@@ -19,25 +19,38 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/info', (request, response) => {
-  const nRecords = phonebook.length
-  const time = new Date()
-  response.send(`<p>Phonebook has info for ${nRecords} people</p><p>${time}</p>`)
-})
-
-app.get('/api/persons/:id', (request, response) => {
-  Person.findById(request.params.id).then(person => {
-  response.json(person)
+  Person.find({}).then(personArray => {
+    const nRecords = personArray.length
+    const time = new Date()
+    response.send(`<p>Phonebook has info for ${nRecords} people</p><p>${time}</p>`)
   })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id
-  phonebook = phonebook.filter(person => person.id !== id)
-
-  response.status(204).end()
+app.get('/api/persons/:id', (request, response, next) => {
+  Person.findById(request.params.id)
+  .then(person => {
+    if(person){
+      response.json(person)
+    }
+    else{
+      response.status(404).end()
+    }
+  })
+  .catch(e => next(e))
 })
 
-app.post('/api/persons',(request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
+  const id = request.params.id
+  Person.findByIdAndDelete(id)
+  .then(() => {
+    response.status(204).end()
+  })
+  .catch(e => {
+    next(e)
+  })
+})
+
+app.post('/api/persons',(request, response, next) => {
   const data = request.body
   if(!data.name || !data.number){
     response.append('Content-Type','application/json')
@@ -45,19 +58,56 @@ app.post('/api/persons',(request, response) => {
     .json({
       error: 'missing name or number'
     })
-    .end()
     return
   }
   const person = new Person({
-    name: data.name,
-    number: data.number,
-  })
+      name: data.name,
+      number: data.number
+    })
+  response.status(200)
   person.save().then(savedPerson => {
-    response.status(201).json(savedPerson)
-  }).catch(e => response.send(e))
+    response.json(savedPerson)
+  }).catch(e => next(e))
+})
+
+
+app.put('/api/persons/:id',(request, response, next) => {
+  const id = request.params.id
+  const data = request.body
+  if(!data.name || !data.number){
+    response.append('Content-Type','application/json')
+    .status(400)
+    .json({
+      error: 'missing name or number'
+    })
+    return
+  }
+
+  Person.findById(id).then(record => {
+    if(!record){
+      response.status(404).json({error: "resource not found"})
+    }
+    else{
+      record.number = data.number
+      record.save().then((savedPerson)=>{
+        response.status(200).json(savedPerson)
+      }).catch(e => next(e))
+    }
+  })
 })
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+  if (error.name === 'CastError'){
+    return response.status(400).send({error: 'malformatted id'})
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)

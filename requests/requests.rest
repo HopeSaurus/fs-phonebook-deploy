@@ -5,7 +5,15 @@ Content-Type: application/json
 
 {
   "name": "Testinho as always",
-  "number": "6969-420420"
+  "number": "6969-42042012123124"
+}
+###
+PUT http://localhost:3001/api/persons/
+Content-Type: application/json
+
+{
+  "name": "Testinho as always",
+  "number": "6969"
 }
 ###
 POST http://localhost:3001/api/persons/
