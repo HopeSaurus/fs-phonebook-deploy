@@ -36,7 +36,10 @@ Content-Type: application/json
 
 {
   "name": "Hemlo hellower",
-  "number": "6969-420420"
+  "number": "121234-"
 }
 ###
 GET http://localhost:3001/api/persons
+###
+
+GET http://localhost:3001/info
